@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+<title>html5音乐播放器</title>
+<style type="text/css">
+    *{padding: 0;margin: 0}
+    html{
+    	width: 100%;
+    	height: 100%;
+    }
+    body{
+    	width: 100%;
+    	background: #CCFFFF;
+    	height: 100%;
+    }
+    .music-box{
+    	position: absolute;
+    	top: 10%;
+    	left: 17.5%;
+       	width: 65%;
+    	height: 80%;
+    	margin: auto;
+    	background: #444;
+    }
+    .music-div{
+    	width: 100%;
+    	height: 95%;
+    	background-color: #000;
+    	color: #fff;
+    	background-repeat: no-repeat;
+    	background-size: cover;
+    	border: 1px solid #555;
+    	font-weight: bold;
+    	position: relative;
+    	text-align: center;
+    	background-size: 100%;
+    }
+    .music-div h2{
+    	opacity: 0.5;
+    	margin-top: 2em;
+    	margin-bottom: 1em
+    }
+    .content{
+    	opacity: 0.5;
+    	filter: alpha(opacity=50);
+    }
+    .tool-div{
+    	width: 100%;
+    	position: relative;
+    	border: 1px solid #ad3;
+    }
+    .tool-div>div{
+    	width: 10%;
+    	height: 3em;
+    	line-height: 3em;
+    	float: left;
+    	background: #eee;
+    	border-left: 1px solid #999;
+    	text-align: center;
+    	cursor: pointer;
+    }
+    div.loop{min-width: 4em;}
+    .tool-div>div:hover{
+    	background-color: #EF9E9E;
+    	color: #fff;
+    }
+    .tool-div .time{
+    	position: absolute;
+    	width: 60%;
+    	right: 0px;
+    	top: 0px;
+    	cursor: default;
+    }
+    .tool-div .time:hover{
+    	background: #fff;
+    	color: #000;
+    }
+    .progress{
+    	position: absolute;
+    	bottom: 10px;
+    	left: 0px;
+    	width: 100%;
+    	background-color: #fff;
+    	height: 8px;
+    	border-top: 1px solid #666;
+    	border-bottom: 1px solid #666;
+    }
+    .cur-div{
+    	position: relative;
+    	width: 0%;
+    	height: 8px;
+    	background-color: #E4938D;
+    }
+    .bar{
+    	position: absolute;
+    	top: -6px;
+    	right: -15px;
+    	width: 15px;
+    	height: 20px;
+    	border-radius:3px;
+    	background: #AEEDAA;
+    }
+    #music{
+    	display: none;
+    }
+    .clear{
+    	clear: both;
+    }
+    @media (max-width: 960px){
+    	.tool-div>div{
+	    	width: 20%;
+    	}
+    	.tool-div .time{
+	    	width: 20%;
+	    }
+    }
+</style>
+</head>
+
+<body>
+	<!--[if lte IE 9]>
+        <div id="warning_info" class="text-warning fade in mb_0">
+            <button data-dismiss="alert" class="close" type="button">×</button>
+            <strong>您正在使用低版本浏览器，</strong> 无法完整的显示页面效果。
+            建议您升级到
+            <a href="http://windows.microsoft.com/zh-cn/internet-explorer/download-ie" target="_blank">
+                Internet Explorer 9+</a>
+            或使用谷歌浏览器：<a href="http://www.google.cn/intl/zh-CN/chrome/" target="_blank">Chrome</a>
+            
+        </div>
+        <script type="text/javascript">
+            var oDiv=document.getElementById("warning_info");
+            var oBtn=oDiv.getElementsByTagName("button")[0];
+            oBtn.onclick=function(){
+                document.body.removeChild(oDiv);
+            }
+        </script>
+    <![endif]-->
+    <div class="music-box">
+    	<audio id="music" controls="controls">
+    		<!-- <source src="music/Beyond - 光辉岁月.mp3" type="audio/mp3"> -->
+    		你的浏览器版本太低了奥，建议使用chrome打开或者升级高版本的浏览器。
+    	</audio>
+    	<!-- 歌词框 -->
+    	<div class="music-div">
+    		<h2>歌词</h2>
+    		<div class="content">
+    			暂无歌词。
+    		</div>
+    		<div class="progress">
+    			<div class="cur-div">
+    				<div class="bar"></div>
+    			</div>
+    		</div>
+    	</div>
+    	<!-- 工具 -->
+    	<div class="tool-div">
+    		<div class="prev">上一首</div>
+    		<div class="start">播放</div>
+    		<div class="next">下一首</div>
+    		<div class="loop">顺序播放</div>
+    		<div class="time">0.00</div>
+    		<br class="clear">
+       	</div>
+    </div>
+<script type="text/javascript">
+	window.onload=function(){
+		console.log("余纵横江湖四五载，寻遍大江南北，想尽各行各业，天下更无所从，无可奈何，惟隐居于市，以web为友。呜呼，终有所悟，随决出市。————“码魔”lut000");
+		var oMic=document.getElementById("music");
+		var oDiv=getByClass(document,"music-box")[0];
+		var oDiv1=getByClass(oDiv,"music-div")[0];
+		var tool_start=getByClass(oDiv,"start")[0];
+		var tool_prev=getByClass(oDiv,"prev")[0];
+		var tool_next=getByClass(oDiv,"next")[0];
+		var tool_loop=getByClass(oDiv,"loop")[0];
+		var tool_time=getByClass(oDiv,"time")[0];
+		var tool_progress=getByClass(oDiv,"cur-div")[0];
+		
+		var music_src=[{"src":"music/Beyond - 光辉岁月.mp3","pic":["images/8718367adab44aed391e7cd1b21c8701a18bfbb7.jpg","images/20140220153815-1349500674.jpg","images/201406122253551217.jpg","images/b26a3118d4de5eab4ab1f83866a0e915.jpg"]},{"src":"music/music.mp3","pic":""}];
+
+		var timer=null,timer1=null,timer2=null;
+		var seconds=0;
+		var count=0;
+		var playMusic={
+			// 准备数据
+			readyData:function(oEle,targetEle,autoPlay){
+				// 初始图片
+				oDiv1.style.backgroundImage='url("'+music_src[count].pic[0]+'")';
+				if(autoPlay && autoPlay==true){
+					clearInterval(timer);
+					clearInterval(timer1);
+					oEle.src=music_src[count]["src"];
+					
+					// 文件加载好可播放
+					oEle.oncanplay=function(){
+						seconds=oEle.duration;
+						targetEle.innerHTML=pad(Math.floor(seconds/60))+":"+pad(Math.floor(seconds%60));
+					}
+					playMusic.toPlay(oMic,tool_start,tool_time,tool_progress);
+				}else{
+					oEle.src=music_src[count]["src"];
+					
+					// 文件加载好可播放
+					oEle.oncanplay=function(){
+						seconds=oEle.duration;
+						targetEle.innerHTML=pad(Math.floor(seconds/60))+":"+pad(Math.floor(seconds%60));
+					}
+				}
+			},
+			toPlay:function(oEle,obj,targetEle,progressBar){
+				// 当前播放的时间
+				var now_t=0;
+				var m=0,s=0;
+				// 开播
+				oEle.play();
+				// 计时
+				timer=setInterval(function(){
+					now_t=oEle.currentTime;
+
+					has_t=Math.floor(seconds-now_t);
+					var m=pad(Math.floor(has_t/60));
+					var s=pad(Math.floor(has_t%60));
+					targetEle.innerHTML=m+":"+s;
+					// 播放结束
+					if(has_t<=0){
+						// 是否单曲循环
+						if(loop_b==true){
+							playMusic.toNext(oEle);
+						}else{
+							playMusic.toNext(oEle,true);
+						}
+						
+					}
+				},1000);
+				// 进度条
+				timer1=setInterval(function(){
+					var now_t1=oEle.currentTime;
+					progressBar.style.width=(now_t1/seconds)*100+"%";
+				},30);
+				obj.innerHTML="暂停";
+			},
+			toStop:function(oEle,obj){
+				clearInterval(timer1);
+				clearInterval(timer2);
+				clearInterval(timer);
+				
+				oEle.pause();
+				obj.innerHTML="开始";
+			},
+			toNext:function(oEle,loop){
+				if(count>=music_src.length-1){
+					count=-1;
+				}
+				if(loop && loop==true){
+					count=count;
+				}else{
+					count++;
+				}
+				playMusic.readyData(oEle,tool_time,true);
+			},
+			toPrve:function(oEle){
+				if(count<=0){
+					count=0;
+					alert("到顶啦");
+				}else{
+					count--;
+					playMusic.readyData(oEle,tool_time,true);
+				}
+				
+			},
+			progress:function(oEle,obj){
+				oEle.src=music_src[count]["src"];
+				var second1=0,now_t1=0;
+				// 文件加载好可播放
+				oEle.oncanplay=function(){
+					second1=oEle.duration;
+				};
+				timer1=setInterval(function(){
+					now_t1=oEle.currentTime;
+					obj.style.width=(now_t1/second1)*100+"%";
+				},100);
+
+			},
+			bgPic:function(obj){
+				var num=0;
+				var len=music_src[count].pic.length;
+				timer2=setInterval(function(){
+					var bg_src=music_src[count].pic[num];
+					obj.style.backgroundImage='url("'+bg_src+'")';
+					num++;
+					if(num>len-1){
+						num=0;
+					}
+				},5000);
+			}
+		}
+		playMusic.readyData(oMic,tool_time);
+		var start_b=true;
+		// 开播按钮
+		tool_start.onclick=function(){
+			if(start_b==true){
+				playMusic.bgPic(oDiv1);
+				playMusic.toPlay(oMic,this,tool_time,tool_progress);
+				start_b=false;
+			}else{
+				playMusic.toStop(oMic,this);
+				start_b=true;
+			}	
+		}
+		// 下一首
+		tool_next.onclick=function(){
+			playMusic.toNext(oMic);
+		}
+		// 上一首
+		tool_prev.onclick=function(){
+			playMusic.toPrve(oMic);
+		}
+		// 播放模式
+		var loop_b=true;
+		tool_loop.onclick=function(){
+			if(loop_b==true){
+				this.innerHTML="单曲循环";
+				loop_b=false;
+			}else{
+				this.innerHTML="顺序播放";
+				loop_b=true;
+			}
+		}
+	}
+// 获取class
+function getByClass(oParent,sClass){
+	var aEle=oParent.getElementsByTagName("*");
+	var aResult=[];
+	for(var i=0,tt=aEle.length;i<tt;i++){
+		if(aEle[i].className.indexOf(sClass)>=0){
+			var arr_class=aEle[i].className.split(" ");
+			for(var j=0,len=arr_class.length;j<len;j++){
+				if(arr_class[j]==sClass){
+					aResult.push(aEle[i]);
+				}
+			}
+		}
+	}
+	return aResult;
+}
+// 加位
+function pad(num){
+	var len=num.toString().length;
+	if(len<2){
+		num="0"+num;
+	}
+	return num;
+}
+</script>
+</body>
+</html>

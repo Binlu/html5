@@ -1,0 +1,11 @@
+@charset "utf-8";
+html,body,a,button,div,dl,dt,dd,form,h1,h2,h3,h4,h5,h6,input,img,li,label,ol,p,span,table,thead,tbody,tfoot,th,td,tr,ul,section,audio,video,nav,header,footer{
+	padding: 0px;
+	margin: 0px;
+}
+ol,ul,li{
+	list-style: none;
+}
+a{
+	text-decoration: none;
+}
