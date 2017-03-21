@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>疯狂的canvas</title>
+        <meta charset="utf-8"/>
+        <meta name="author" content="lut">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <style type="text/css">
+            *{margin: 0;padding: 0;}
+            html,body{
+                height: 100%;
+                background-color: #232425;
+                overflow: hidden;
+            }
+            .box{
+                height: 100%;
+                zoom:1\9;
+            }
+            .box:after{
+                content: "";
+                display: block;
+                clear: both;
+            }
+            .left{
+                float:left;
+                width: 200px;
+                min-height: 100%;
+                background-color: #A7A26E;
+            }
+            .content{
+                min-height: 100%;
+                padding-left: 200px;
+                color: blue;
+                text-align: center;
+            }
+            .nav>li{
+                position: relative;
+                width: 60px;
+                padding: 5px 10px;
+                margin: 10px;
+                text-align: center;
+                background-color: #fff;
+                transition: all ease 0.5s;
+                backface-visibility:hidden;
+            }
+            .nav>li>span{
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                line-height: 30px;
+                transform: rotateX(180deg);
+                opacity: 0;
+            }
+            #canvas-ele{
+                background-color: #fff;
+            }
+        </style>
+    </head>
+    <body>
+        
+        <div id="box" class="box">
+            <div class="left">
+                <ul class="nav">
+                    <li>首页
+                        <span>首页</span>
+                    </li>
+                    <li>文化</li>
+                    <li>娱乐</li>
+                    <li>学习</li>
+                    <li>体育</li>
+                </ul>
+            </div>
+            <div class="content">
+                <canvas id="canvas-ele">
+                    阁下的浏览器不支持canvas！
+                </canvas>
+            </div>
+        </div>
+        <script type="text/javascript" src="js/sharp-1.2.development.js"></script>
+        <script type="text/javascript">
+            window.onload=function(){
+                !function(g){
+                    // dom
+                    var canvas_ele=document.querySelector("#canvas-ele");
+                    var content_ele=document.querySelector(".content");
+                    
+                    // fn
+                    if(!window.requestAnimationFrame){
+                        window.requestAnimationFrame = function(fn) {
+                            setTimeout(fn,17);
+                        };
+                    };
+                    function render(){          //对象
+                        this.canvas=canvas_ele;
+                        this.content_ele=content_ele;
+                        this.ow=0;
+                        this.oh=0;
+                        this.context=this.canvas.getContext("2d");
+
+                        this.limit_val=20;
+                        this.limit_opacity=0.5;
+
+                        this.arr=[];
+                        this.timer=null;
+                        this.is_set=false;
+                        this.init();
+                    };
+                    function throttle(method,context){          //函数节流
+                        clearTimeout(method.tid);
+                        method.tid=setTimeout(function(){
+                            method.call(context);
+                        });
+                    };
+                    render.prototype={          //原型
+                        init:function(){
+                            var a=this;
+                            a.reStyle();
+                            a.bindFunc();
+                            // 这里处理一下浏览器窗口发生变化的调整
+                            window.onresize=function(){
+                                throttle(a.reStyle,a);
+                            };
+                        },
+                        bindFunc:function(){
+                            var a=this;
+                            a.canvas.onclick=function(ev){
+                                var new_ele=a.setEle({
+                                    x:ev.offsetX,
+                                    y:ev.offsetY,
+                                    sq:100,
+                                    s_x:5,
+                                    s_y:3
+                                });
+                                a.arr.push(new_ele);
+                                if(a.is_set==false){
+                                    a.is_set=true;
+                                    a.moveFunc(a,1);
+                                }
+                            };
+                        },
+                        moveFunc:function(that,is_first){
+
+                            var a=that || this,arr=a.arr;
+                            a.clearArea();
+                            if(is_first!=1){
+                                for(var i=0,len=arr.length;i<len;i++){
+                                    arr[i]["fillRect"]=a.setPosition(arr[i]["fillRect"]);
+                                    a.drawFunc(arr[i]);
+                                };
+                            }else{
+                                for(var i=0,len=arr.length;i<len;i++){
+                                    a.drawFunc(arr[i]);
+                                };
+                            };
+
+                            requestAnimationFrame(function(){
+                                a.moveFunc(a);
+                            });
+                        },
+                        setPosition:function(obj){
+                            var a=this;
+                            var x=obj.x,y=obj.y,w=obj.w,h=obj.h;
+                            var speed_x=obj.speed_x,speed_y=obj.speed_y;
+                            x+=speed_x;
+                            y+=speed_y;
+                            if(x+w>=a.ow){
+                                x=a.ow-w;
+                                speed_x=-speed_x;
+                            }else if(x<=0){
+                                x=0
+                                speed_x=-speed_x;
+                            };
+                            if(y+h>=a.oh){
+                                y=a.oh-h;
+                                speed_y=-speed_y;
+                            }else if(y<=0){
+                                y=0
+                                speed_y=-speed_y;
+                            };
+                            return  {x:x,y:y,h:h,w:w,speed_x:speed_x,speed_y:speed_y}
+                        },
+                        setEle:function(opt){
+                            var a=this;
+                            var w=Math.floor(opt.sq*Math.random()),h=Math.floor(opt.sq*Math.random()),s_x=Math.ceil(opt.s_x*Math.random()),s_y=Math.ceil(opt.s_y*Math.random());
+
+                            s_x=s_x>opt.s_x/2?-s_x:s_x;
+                            s_y=s_y>opt.s_y/2?-s_y:s_y;
+
+                            var res={
+                                fillRect:{x:opt.x,y:opt.y,w:w<a.limit_val?a.limit_val:w,h:h<a.limit_val?a.limit_val:h,speed_x:s_x,speed_y:s_y},
+                                globalAlpha:Math.random()<a.limit_opacity?a.limit_opacity:Math.random(),
+                                fillStyle:a.getRandomColor()
+                            };
+                            return res;
+                        },
+                        clearArea:function(){
+                            var a=this;
+                            a.context.clearRect(0,0,a.ow,a.oh);
+                        },
+                        drawFunc:function(opt){
+                            var a=this,ctx=a.context;
+                            for(var key in opt){
+                                if(key=="fillRect") continue;
+                                ctx[key]=opt[key];
+                            }
+                            ctx.fillRect(opt.fillRect.x,opt.fillRect.y,opt.fillRect.w,opt.fillRect.h)
+                        },
+                        reStyle:function(){
+                            var a=this;
+                            a.ow=a.content_ele.clientWidth-200;
+                            a.oh=a.content_ele.clientHeight;
+                            a.canvas.width=a.ow;
+                            a.canvas.height=a.oh;
+                        },
+                        getRandomColor:function(){
+                            var arr=["#f02","#de4","#f59845","#34fe55","#def000"];
+                            return  arr[Math.floor(Math.random()*(arr.length-1))];
+                        }
+                    };
+                    g.render=render;
+                }(window);
+                var aaa=new render();
+            };
+        </script>
+    </body>
+</html>
